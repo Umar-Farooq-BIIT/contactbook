@@ -41,6 +41,7 @@ class _NewContactScreenState extends State<NewContactScreen> {
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SafeArea(child: Column(
+          spacing: 20 ,
           children: [
             Stack(
               children: [
