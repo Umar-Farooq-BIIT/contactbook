@@ -33,6 +33,8 @@ dependencies:
   sqflite: any
   path: any
   image_picker: any
+  image: ^4.2.0
+
 
 
 

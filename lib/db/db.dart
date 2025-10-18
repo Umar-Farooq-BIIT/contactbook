@@ -30,12 +30,26 @@ await db.execute(query);
   }
   Future<int> insertRaw(String name,String number,String ?image,String ?email)
   async {
-    String query='''
-     insert into Contact (name,number,imageString,email) values 
-      ('${name}','${number}','${image}','${email}')
-     ''';
-     Database db=await database;
-   return await db.rawInsert(query);
+  //   String query='''
+  //    insert into Contact (name,number,imageString,email) values 
+  //     ('${name}','${number}','${image}','${email}')
+  //    ''';
+  //    Database db=await database;
+  //  return await db.rawInsert(query);
+   Database db = await database;
+  Map<String, dynamic> data = {
+    'name': name,
+    'number': number,
+    'imageString': image,
+    'email': email,
+  };
+  return await db.insert('Contact', data);
      
+  }
+  Future<List<Map<String,dynamic>>> selectRaw()async
+  {
+    Database db=await database;
+    String query='Select * from  Contact';
+     return await db.rawQuery(query);
   }
 }

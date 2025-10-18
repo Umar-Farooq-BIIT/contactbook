@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-
+import 'package:image/image.dart' as img;
 import 'package:contact_book/db/db.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +17,24 @@ class _NewContactScreenState extends State<NewContactScreen> {
   TextEditingController emailController=TextEditingController();
   TextEditingController phoneController=TextEditingController();
   File? _image;
+  String ?base64String;
+  Future<String> compressAndEncodeImage(File imageFile) async {
+  // Read image bytes
+  final bytes = await imageFile.readAsBytes();
+
+  // Decode image
+  img.Image? original = img.decodeImage(bytes);
+  if (original == null) throw Exception("Failed to decode image");
+
+  // Resize image to smaller width (e.g., 400 px)
+  final resized = img.copyResize(original, width: 400);
+
+  // Re-encode as JPEG with lower quality (0–100)
+  final compressed = img.encodeJpg(resized, quality: 70);
+
+  // Convert to Base64
+  return base64Encode(compressed);
+}
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +57,9 @@ class _NewContactScreenState extends State<NewContactScreen> {
                       ImagePicker picker=ImagePicker();
                     XFile? _pickedImage  =await picker.pickImage(source: ImageSource.camera);
                     if(_pickedImage!=null){
+                  
                       _image=File(_pickedImage.path);
+                  
                       setState(() {
                         
                       });
@@ -75,18 +95,24 @@ class _NewContactScreenState extends State<NewContactScreen> {
             ),
             ),
             ElevatedButton(onPressed: () async {
-              String ?base64String;
+             
               String ?email;
               String name=nameController.text;
               String phoneNum=phoneController.text;
               if(_image!=null){
-                  base64String =base64Encode( await _image!.readAsBytes() as List<int>);
+                base64String= await compressAndEncodeImage(_image!);
               }
+            
               if(!emailController.text.isEmpty){
                 email=emailController.text;
               }
              int id=  await DBHelper.instance.insertRaw(name, phoneNum,base64String, email);
-               if(id>0)
+               if(id>0){
+               await ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Data inserted..'))
+                );
+                Navigator.pop(context);
+               }
                print('Data inserted successfully');
             }, child: Text('Save',style: TextStyle(fontSize: 20),))
           ],
